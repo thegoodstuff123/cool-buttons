@@ -19,6 +19,7 @@ body {
 }
 #rocket { font-size: 5rem; position: absolute; bottom: 0; transition: bottom 3s ease-out; }
 button { margin: 10px; padding: 10px 20px; font-size: 1rem; border-radius: 10px; cursor:pointer; }
+.coins { font-size: 1.5rem; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -32,10 +33,21 @@ button { margin: 10px; padding: 10px 20px; font-size: 1rem; border-radius: 10px;
 let coins = parseInt(localStorage.getItem('coins')) || 0;
 document.getElementById('coins').textContent = coins;
 
+// Launch rocket animation
 document.getElementById('launchBtn').addEventListener('click', ()=>{
   document.getElementById('rocket').style.bottom='100vh';
 });
-document.getElementById('backBtn').addEventListener('click', ()=> location.href='index.html');
+
+// Back button
+document.getElementById('backBtn').addEventListener('click', ()=>{
+  location.href='index.html';
+});
+
+// Optional: auto-update coins if other page adds coins
+setInterval(()=>{
+  coins = parseInt(localStorage.getItem('coins')) || coins;
+  document.getElementById('coins').textContent = coins;
+},500);
 </script>
 </body>
 </html>
