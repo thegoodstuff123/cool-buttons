@@ -7,60 +7,58 @@
 <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/3/38/Button_Icon.png">
 <style>
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  background: linear-gradient(135deg, #111, #222);
-  color: white;
-  transition: background 0.5s;
+  margin:0;
+  font-family:Arial,sans-serif;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  background:linear-gradient(135deg,#111,#222);
+  color:white;
+  transition:background 0.5s;
 }
+h1{font-size:3rem;margin:20px 0;}
+.coins{font-size:1.5rem;margin-bottom:20px;}
+.button-row{margin:10px 0;}
+button{
+  padding:15px 30px;
+  margin:10px;
+  font-size:1.2rem;
+  border:none;
+  border-radius:50px;
+  cursor:pointer;
+  color:white;
+  background:linear-gradient(90deg,#ff00cc,#3333ff);
+  box-shadow:0 0 20px rgba(255,0,200,0.6);
+  transition:.3s ease;
+  position:relative;
+  overflow:hidden;
+}
+button:hover{transform:scale(1.1);box-shadow:0 0 40px rgba(0,200,255,0.9);}
+button::before{
+  content:"";
+  position:absolute;
+  top:0; left:-100%;
+  width:100%; height:100%;
+  background:rgba(255,255,255,0.3);
+  transform:skewX(-30deg);
+  transition:.5s;
+}
+button:hover::before{left:100%;}
 
-h1 { font-size: 3rem; margin: 20px 0; }
-.coins { font-size: 1.5rem; margin-bottom: 20px; }
-.button-row { margin: 10px 0; }
-
-button {
-  padding: 15px 30px;
-  margin: 10px;
-  font-size: 1.2rem;
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
-  color: white;
-  background: linear-gradient(90deg, #ff00cc, #3333ff);
-  box-shadow: 0 0 20px rgba(255, 0, 200, 0.6);
-  transition: 0.3s ease;
-  position: relative;
-  overflow: hidden;
+#settingsModal,#shopModal{
+  display:none;
+  position:fixed;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  background:#222;
+  padding:30px;
+  border-radius:15px;
+  box-shadow:0 0 30px #00ffff;
+  color:white;
 }
-button:hover { transform: scale(1.1); box-shadow: 0 0 40px rgba(0, 200, 255, 0.9); }
-button::before {
-  content: "";
-  position: absolute;
-  top: 0; left: -100%;
-  width: 100%; height: 100%;
-  background: rgba(255,255,255,0.3);
-  transform: skewX(-30deg);
-  transition: 0.5s;
-}
-button:hover::before { left: 100%; }
-
-#settingsModal, #shopModal {
-  display: none;
-  position: fixed;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  background: #222;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 0 30px #00ffff;
-  color: white;
-}
-#settingsModal button, #shopModal button { margin-top: 15px; }
+#settingsModal button,#shopModal button{margin-top:15px;}
 </style>
 </head>
 <body>
@@ -95,92 +93,104 @@ button:hover::before { left: 100%; }
 <!-- Shop Modal -->
 <div id="shopModal">
   <h2>Button Shop</h2>
-  <p>Buy fun buttons with your Button Coins!</p>
-  <button id="buyButtonBtn">Buy New Button (Cost: 10 coins)</button>
-  <br>
+  <p>Buy fun buttons, starter buttons, auto-clickers, or coin upgrades!</p>
+  <div id="shopItems"></div>
   <button id="closeShop">Close</button>
 </div>
 
 <script>
-// ----- Persistent Data -----
+// ---- Persistent Data ----
 let coins = parseInt(localStorage.getItem('coins')) || 0;
 let bgColor = localStorage.getItem('bgColor') || '#111111';
-document.body.style.background = bgColor;
-
-// Load purchased buttons
 let purchasedButtons = JSON.parse(localStorage.getItem('purchasedButtons')) || [];
+let autoClickers = parseInt(localStorage.getItem('autoClickers')) || 0;
+let coinMultiplier = parseInt(localStorage.getItem('coinMultiplier')) || 1;
 
-function updateCoins() { document.getElementById('coins').textContent = coins; }
+document.body.style.background = bgColor;
 updateCoins();
 
-// ----- Restore purchased buttons -----
-function restoreButtons() {
-  purchasedButtons.forEach(btnText => {
-    const newBtn = document.createElement('button');
-    newBtn.textContent = btnText;
-    newBtn.style.background = `hsl(${Math.random()*360},80%,60%)`;
-    newBtn.addEventListener('click', ()=>alert(`You pressed your ${btnText}!`));
+// ---- Coins Display ----
+function updateCoins(){document.getElementById('coins').textContent=coins;}
+
+// ---- Restore purchased buttons ----
+function restoreButtons(){
+  purchasedButtons.forEach(btnText=>{
+    const newBtn=document.createElement('button');
+    newBtn.textContent=btnText;
+    newBtn.style.background=`hsl(${Math.random()*360},80%,60%)`;
+    newBtn.addEventListener('click',()=>alert(`You pressed your ${btnText}!`));
     document.body.appendChild(newBtn);
   });
 }
 restoreButtons();
 
-// ----- Play Button: Clicker Game -----
-document.getElementById('playBtn').addEventListener('click', () => {
-  document.body.innerHTML = "<h1>Game Started!</h1>";
-  const scoreDisplay = document.createElement('div');
-  scoreDisplay.style.fontSize = '1.5rem';
-  scoreDisplay.style.margin = '10px';
-  scoreDisplay.textContent = `Coins: ${coins}`;
+// ---- Auto-Clicker ----
+function startAutoClickers(){
+  if(autoClickers>0){
+    setInterval(()=>{
+      coins += autoClickers*coinMultiplier;
+      updateCoins();
+    },1000);
+  }
+}
+startAutoClickers();
+
+// ---- Play Button ----
+document.getElementById('playBtn').addEventListener('click',()=>{
+  document.body.innerHTML="<h1>Game Started!</h1>";
+  const scoreDisplay=document.createElement('div');
+  scoreDisplay.style.fontSize='1.5rem';
+  scoreDisplay.style.margin='10px';
+  scoreDisplay.textContent=`Coins: ${coins}`;
   document.body.appendChild(scoreDisplay);
 
-  const gameBtn = document.createElement('button');
-  gameBtn.textContent = "Click Me!";
-  gameBtn.style.fontSize = "1.5rem";
-  gameBtn.style.padding = "20px 50px";
+  const gameBtn=document.createElement('button');
+  gameBtn.textContent="Click Me!";
+  gameBtn.style.fontSize="1.5rem";
+  gameBtn.style.padding="20px 50px";
   document.body.appendChild(gameBtn);
 
-  const backBtn = document.createElement('button');
-  backBtn.textContent = "⬅ Back";
-  backBtn.style.marginTop = '20px';
+  const backBtn=document.createElement('button');
+  backBtn.textContent="⬅ Back";
+  backBtn.style.marginTop='20px';
   document.body.appendChild(backBtn);
-  backBtn.addEventListener('click', ()=> location.reload());
+  backBtn.addEventListener('click',()=> location.reload());
 
-  gameBtn.addEventListener('click', () => {
-    coins++;
+  gameBtn.addEventListener('click',()=>{
+    coins += coinMultiplier;
     updateCoins();
-    scoreDisplay.textContent = `Coins: ${coins}`;
+    scoreDisplay.textContent=`Coins: ${coins}`;
   });
 });
 
-// ----- Settings Modal -----
-const settingsModal = document.getElementById('settingsModal');
-document.getElementById('settingsBtn').addEventListener('click', () => settingsModal.style.display='block');
-document.getElementById('closeSettings').addEventListener('click', ()=> settingsModal.style.display='none');
-document.getElementById('bgColorPicker').addEventListener('input', (e)=>{
-  document.body.style.background = e.target.value;
-  bgColor = e.target.value;
+// ---- Settings ----
+const settingsModal=document.getElementById('settingsModal');
+document.getElementById('settingsBtn').addEventListener('click',()=>settingsModal.style.display='block');
+document.getElementById('closeSettings').addEventListener('click',()=>settingsModal.style.display='none');
+document.getElementById('bgColorPicker').addEventListener('input',e=>{
+  document.body.style.background=e.target.value;
+  bgColor=e.target.value;
 });
 
-// ----- Launch Button -----
-document.getElementById('launchBtn').addEventListener('click', () => window.location.href='launch.html');
+// ---- Launch Button ----
+document.getElementById('launchBtn').addEventListener('click',()=>window.location.href='launch.html');
 
-// ----- Surprise Button -----
-document.getElementById('surpriseBtn').addEventListener('click', () => {
-  const emojis=['🎉','🪐','💥','✨','🔥','🌈'];
+// ---- Surprise Button ----
+const emojis=['🎉','🪐','💥','✨','🔥','🌈','🚀','🛸','🪄','⚡','🍭','🎶','💎','🌟'];
+document.getElementById('surpriseBtn').addEventListener('click',()=>{
   alert(`Surprise! ${emojis[Math.floor(Math.random()*emojis.length)]}`);
 });
 
-// ----- Color Burst -----
-document.getElementById('colorBurstBtn').addEventListener('click', () => {
+// ---- Color Burst ----
+document.getElementById('colorBurstBtn').addEventListener('click',()=>{
   document.querySelectorAll('button').forEach(btn=>{
-    const r=Math.floor(Math.random()*256), g=Math.floor(Math.random()*256), b=Math.floor(Math.random()*256);
+    const r=Math.floor(Math.random()*256),g=Math.floor(Math.random()*256),b=Math.floor(Math.random()*256);
     btn.style.background=`rgb(${r},${g},${b})`;
   });
 });
 
-// ----- Confetti -----
-document.getElementById('confettiBtn').addEventListener('click', ()=>{
+// ---- Confetti ----
+document.getElementById('confettiBtn').addEventListener('click',()=>{
   for(let i=0;i<50;i++){
     const conf=document.createElement('div');
     conf.style.position='fixed';
@@ -195,48 +205,77 @@ document.getElementById('confettiBtn').addEventListener('click', ()=>{
   }
 });
 
-// ----- Shop Modal -----
+// ---- Shop ----
 const shopModal=document.getElementById('shopModal');
-document.getElementById('shopBtn').addEventListener('click', ()=> shopModal.style.display='block');
-document.getElementById('closeShop').addEventListener('click', ()=> shopModal.style.display='none');
+const shopItemsDiv=document.getElementById('shopItems');
+document.getElementById('shopBtn').addEventListener('click',()=>shopModal.style.display='block');
+document.getElementById('closeShop').addEventListener('click',()=>shopModal.style.display='none');
 
-// Buy button from shop
-document.getElementById('buyButtonBtn').addEventListener('click', ()=>{
-  if(coins>=10){
-    coins-=10;
-    updateCoins();
-    const btnText = `Fun Button ${purchasedButtons.length+1}`;
-    purchasedButtons.push(btnText);
-    localStorage.setItem('purchasedButtons', JSON.stringify(purchasedButtons));
+// Shop Item Definitions
+const shopItems=[
+  {name:'Fun Button',cost:10,type:'button'},
+  {name:'Starter Button: Play',cost:5,type:'button'},
+  {name:'Starter Button: Surprise',cost:5,type:'button'},
+  {name:'Auto-Clicker',cost:50,type:'auto'},
+  {name:'Coin Upgrade +1',cost:30,type:'multiplier'}
+];
 
-    const newBtn = document.createElement('button');
-    newBtn.textContent = btnText;
-    newBtn.style.background = `hsl(${Math.random()*360},80%,60%)`;
-    newBtn.addEventListener('click', ()=> alert(`You pressed your ${btnText}!`));
-    document.body.appendChild(newBtn);
-  } else alert("Not enough coins!");
+// Render Shop Items
+shopItems.forEach(item=>{
+  const btn=document.createElement('button');
+  btn.textContent=`Buy ${item.name} (Cost: ${item.cost})`;
+  btn.addEventListener('click',()=>{
+    if(coins>=item.cost){
+      coins-=item.cost;
+      updateCoins();
+      if(item.type==='button'){
+        purchasedButtons.push(item.name);
+        localStorage.setItem('purchasedButtons',JSON.stringify(purchasedButtons));
+        const newBtn=document.createElement('button');
+        newBtn.textContent=item.name;
+        newBtn.style.background=`hsl(${Math.random()*360},80%,60%)`;
+        newBtn.addEventListener('click',()=>alert(`You pressed ${item.name}!`));
+        document.body.appendChild(newBtn);
+      } else if(item.type==='auto'){
+        autoClickers++;
+        localStorage.setItem('autoClickers',autoClickers);
+        startAutoClickers();
+        alert(`You now have ${autoClickers} Auto-Clicker(s)!`);
+      } else if(item.type==='multiplier'){
+        coinMultiplier++;
+        localStorage.setItem('coinMultiplier',coinMultiplier);
+        alert(`Coin multiplier increased! Each click now gives ${coinMultiplier} coin(s).`);
+      }
+    } else alert("Not enough coins!");
+  });
+  shopItemsDiv.appendChild(btn);
 });
 
-// ----- Save / Load -----
-document.getElementById('saveBtn').addEventListener('click', ()=>{
-  localStorage.setItem('coins', coins);
-  localStorage.setItem('bgColor', bgColor);
-  localStorage.setItem('purchasedButtons', JSON.stringify(purchasedButtons));
+// ---- Save ----
+document.getElementById('saveBtn').addEventListener('click',()=>{
+  localStorage.setItem('coins',coins);
+  localStorage.setItem('purchasedButtons',JSON.stringify(purchasedButtons));
+  localStorage.setItem('autoClickers',autoClickers);
+  localStorage.setItem('coinMultiplier',coinMultiplier);
+  localStorage.setItem('bgColor',bgColor);
   alert("Game Saved! 💾");
 });
 
-// ----- Reset Save -----
-document.getElementById('resetSaveBtn').addEventListener('click', ()=>{
+// ---- Reset Save ----
+document.getElementById('resetSaveBtn').addEventListener('click',()=>{
   if(confirm("Are you sure you want to reset your save?")){
-    coins=0; bgColor='#111111'; purchasedButtons=[];
+    coins=0; purchasedButtons=[]; autoClickers=0; coinMultiplier=1; bgColor='#111111';
     localStorage.clear();
-    updateCoins(); document.body.style.background=bgColor;
-    alert("Save Reset! ⚠️"); location.reload();
+    updateCoins();
+    document.body.style.background=bgColor;
+    alert("Save Reset! ⚠️");
+    location.reload();
   }
 });
 
-// ----- Reset Page -----
-document.getElementById('resetBtn').addEventListener('click', ()=> location.reload());
+// ---- Reset Page ----
+document.getElementById('resetBtn').addEventListener('click',()=>location.reload());
+
 </script>
 </body>
 </html>
