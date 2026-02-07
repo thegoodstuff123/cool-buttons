@@ -138,6 +138,7 @@ startAutoClickers();
 // ---- Play Button ----
 document.getElementById('playBtn').addEventListener('click',()=>{
   document.body.innerHTML="<h1>Game Started!</h1>";
+
   const scoreDisplay=document.createElement('div');
   scoreDisplay.style.fontSize='1.5rem';
   scoreDisplay.style.margin='10px';
@@ -160,6 +161,7 @@ document.getElementById('playBtn').addEventListener('click',()=>{
     coins += coinMultiplier;
     updateCoins();
     scoreDisplay.textContent=`Coins: ${coins}`;
+    localStorage.setItem('coins',coins);
   });
 });
 
@@ -176,7 +178,7 @@ document.getElementById('bgColorPicker').addEventListener('input',e=>{
 document.getElementById('launchBtn').addEventListener('click',()=>window.location.href='launch.html');
 
 // ---- Surprise Button ----
-const emojis=['🎉','🪐','💥','✨','🔥','🌈','🚀','🛸','🪄','⚡','🍭','🎶','💎','🌟'];
+const emojis=['🎉','🪐','💥','✨','🔥','🌈','🚀','🛸','🪄','⚡','🍭','🎶','💎','🌟','💣'];
 document.getElementById('surpriseBtn').addEventListener('click',()=>{
   alert(`Surprise! ${emojis[Math.floor(Math.random()*emojis.length)]}`);
 });
@@ -211,7 +213,7 @@ const shopItemsDiv=document.getElementById('shopItems');
 document.getElementById('shopBtn').addEventListener('click',()=>shopModal.style.display='block');
 document.getElementById('closeShop').addEventListener('click',()=>shopModal.style.display='none');
 
-// Shop Item Definitions
+// Shop Items
 const shopItems=[
   {name:'Fun Button',cost:10,type:'button'},
   {name:'Starter Button: Play',cost:5,type:'button'},
@@ -220,7 +222,6 @@ const shopItems=[
   {name:'Coin Upgrade +1',cost:30,type:'multiplier'}
 ];
 
-// Render Shop Items
 shopItems.forEach(item=>{
   const btn=document.createElement('button');
   btn.textContent=`Buy ${item.name} (Cost: ${item.cost})`;
