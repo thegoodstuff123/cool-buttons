@@ -1,40 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Cool Buttons</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Button Lab 🚀</title>
+  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/3/38/Button_Icon.png">
+
   <style>
     body {
-      background: #111;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #111, #222);
       color: white;
-      font-family: Arial;
       text-align: center;
-      padding-top: 100px;
+      transition: background 0.5s;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 30px;
     }
 
     button {
       padding: 15px 40px;
-      margin: 20px;
-      font-size: 20px;
+      margin: 15px;
+      font-size: 1.2rem;
       border: none;
       border-radius: 50px;
-      background: linear-gradient(90deg, hotpink, cyan);
-      color: white;
       cursor: pointer;
-      transition: 0.3s;
+      color: white;
+      background: linear-gradient(90deg, #ff00cc, #3333ff);
+      box-shadow: 0 0 20px rgba(255, 0, 200, 0.6);
+      transition: 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
 
     button:hover {
-      transform: scale(1.15);
-      box-shadow: 0 0 25px cyan;
+      transform: scale(1.1);
+      box-shadow: 0 0 40px rgba(0, 200, 255, 0.9);
+    }
+
+    button::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: skewX(-30deg);
+      transition: 0.5s;
+    }
+
+    button:hover::before {
+      left: 100%;
     }
   </style>
 </head>
 
 <body>
-  <h1>🚀 Cool Buttons</h1>
-  <button>Play</button>
-  <button>Settings</button>
-  <button>Launch</button>
+  <div>
+    <h1>🚀 Button Lab</h1>
+    <button id="playBtn">Play</button>
+    <button id="settingsBtn">Settings</button>
+    <button id="launchBtn">Launch</button>
+  </div>
+
+  <script>
+    // Play button → show alert
+    document.getElementById('playBtn').addEventListener('click', () => {
+      alert("🎮 Let's play!");
+    });
+
+    // Settings button → show simple popup
+    document.getElementById('settingsBtn').addEventListener('click', () => {
+      const username = prompt("Enter your name to save settings:");
+      if(username) alert(`Settings saved for ${username}! ✅`);
+    });
+
+    // Launch button → change background color randomly
+    document.getElementById('launchBtn').addEventListener('click', () => {
+      const colors = ['#ff0066', '#00ffff', '#ffcc00', '#33ff77', '#ff33ff'];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      document.body.style.background = randomColor;
+    });
+  </script>
 </body>
 </html>
-
