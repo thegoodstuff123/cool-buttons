@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rocket Launch 🚀</title>
+<style>
+  body {
+    margin: 0;
+    background: black;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 100vh;
+    overflow: hidden;
+    color: white;
+    font-family: Arial, sans-serif;
+  }
+
+  #rocket {
+    font-size: 5rem;
+    position: absolute;
+    bottom: 0;
+    transition: bottom 2s ease-out;
+  }
+
+  #launchBtn {
+    position: absolute;
+    top: 20px;
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+</style>
+</head>
+<body>
+  <div id="rocket">🚀</div>
+  <button id="launchBtn">Launch Rocket!</button>
+
+  <script>
+    document.getElementById('launchBtn').addEventListener('click', () => {
+      const rocket = document.getElementById('rocket');
+      rocket.style.transition = 'bottom 3s ease-in-out';
+      rocket.style.bottom = '100vh';
+    });
+  </script>
+</body>
+</html>
