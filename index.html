@@ -10,48 +10,49 @@ body {
   font-family:Arial,sans-serif;
   background:#111;
   color:white;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-start;
   min-height:100vh;
 }
-h1 { margin:20px 0; font-size:2.5rem; }
-.coins { font-size:1.5rem; margin-bottom:20px; }
-.button-row { display:flex; flex-wrap:wrap; justify-content:center; margin:10px 0; gap:10px; }
 button {
   padding:15px 30px; font-size:1.2rem; border:none; border-radius:50px; cursor:pointer;
   color:white; background:linear-gradient(90deg,#ff00cc,#3333ff); transition:0.3s; position:relative;
 }
 button:hover { transform:scale(1.1); }
-#settingsModal,#shopModal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-background:#222;padding:30px;border-radius:15px;box-shadow:0 0 30px #00ffff;}
-#settingsModal button,#shopModal button{margin-top:15px;}
-#gameSection{display:none; flex-direction:column; align-items:center; gap:10px;}
+#guiContainer {
+  position:fixed; top:0; left:0; width:100%; background:#222; padding:10px;
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:center; z-index:1000;
+  gap:10px;
+}
+#buttonContainer {
+  margin-top:120px;
+  display:flex; flex-wrap:wrap; justify-content:center; gap:10px;
+}
+#settingsModal,#shopModal {
+  display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+  background:#222; padding:30px; border-radius:15px; box-shadow:0 0 30px #00ffff;
+  z-index:1001;
+}
+#settingsModal button,#shopModal button { margin-top:15px; }
 </style>
 </head>
 <body>
 
-<h1>🚀 Button Lab</h1>
-<div class="coins">💰 Coins: <span id="coins">0</span></div>
-
-<div class="button-row" id="mainButtons">
-  <button id="playBtn">Play</button>
-  <button id="settingsBtn">Settings</button>
-  <button id="launchBtn">Launch</button>
-  <button id="surpriseBtn">Surprise</button>
-  <button id="colorBurstBtn">Color Burst</button>
-  <button id="confettiBtn">Confetti</button>
-  <button id="shopBtn">Shop</button>
-  <button id="saveBtn">💾 Save</button>
-  <button id="resetSaveBtn">⚠️ Reset Save</button>
+<div id="guiContainer">
+  <div class="coins">💰 Coins: <span id="coins">0</span></div>
+  <div class="button-row" id="mainButtons">
+    <button id="playBtn">Play</button>
+    <button id="settingsBtn">Settings</button>
+    <button id="launchBtn">Launch</button>
+    <button id="surpriseBtn">Surprise</button>
+    <button id="colorBurstBtn">Color Burst</button>
+    <button id="confettiBtn">Confetti</button>
+    <button id="shopBtn">Shop</button>
+    <button id="saveBtn">💾 Save</button>
+    <button id="resetSaveBtn">⚠️ Reset Save</button>
+  </div>
 </div>
 
-<!-- Game Section -->
-<div id="gameSection">
-  <div id="gameCoins">Coins: 0</div>
-  <button id="gameClickBtn">Click Me!</button>
-  <button id="gameBackBtn">⬅ Back</button>
+<div id="buttonContainer">
+  <!-- Purchased buttons (including AI buttons) appear here -->
 </div>
 
 <!-- Settings Modal -->
@@ -78,31 +79,34 @@ let coinMultiplier = parseInt(localStorage.getItem('coinMultiplier')) || 1;
 let bgColor = localStorage.getItem('bgColor') || '#111111';
 let buttonsBought = parseInt(localStorage.getItem('buttonsBought')) || 0;
 
-// Dynamic shop prices
+// Prices
 let autoClickerPrice = parseInt(localStorage.getItem('autoClickerPrice')) || 50;
 let multiplierPrice = parseInt(localStorage.getItem('multiplierPrice')) || 30;
 
-// Initialize
 document.body.style.background = bgColor;
 updateCoins();
 
 // ---- Functions ----
 function updateCoins(){
   document.getElementById('coins').textContent = coins;
-  document.getElementById('gameCoins').textContent = `Coins: ${coins}`;
 }
 
-function addButtonToPage(name){
-  const newBtn = document.createElement('button');
-  newBtn.textContent = name;
-  newBtn.style.background = `hsl(${Math.random()*360},80%,60%)`;
-  newBtn.addEventListener('click', ()=> alert(`You pressed ${name}!`));
-  document.body.appendChild(newBtn);
+const buttonContainer = document.getElementById('buttonContainer');
+
+function addButtonToHome(name){
+  const btn = document.createElement('button');
+  btn.textContent = name;
+  const emojis=['🎉','💥','✨','🔥','🌈','🚀','🛸'];
+  btn.addEventListener('click',()=>{
+    alert(`You pressed ${name}! ${emojis[Math.floor(Math.random()*emojis.length)]}`);
+  });
+  buttonContainer.appendChild(btn);
 }
 
-// Restore AI/previous buttons
-purchasedButtons.forEach(btn=>addButtonToPage(btn));
+// Restore purchased buttons
+purchasedButtons.forEach(name=>addButtonToHome(name));
 
+// ---- Auto Clickers ----
 function startAutoClickers(){
   if(autoClickers>0){
     setInterval(()=>{
@@ -113,41 +117,13 @@ function startAutoClickers(){
 }
 startAutoClickers();
 
-// ---- Play Game ----
-const playBtn = document.getElementById('playBtn');
-const mainButtons = document.getElementById('mainButtons');
-const gameSection = document.getElementById('gameSection');
-playBtn.addEventListener('click',()=>{
-  mainButtons.style.display='none';
-  gameSection.style.display='flex';
-});
-
-document.getElementById('gameClickBtn').addEventListener('click',()=>{
-  coins += coinMultiplier;
-  updateCoins();
-  localStorage.setItem('coins',coins);
-});
-
-document.getElementById('gameBackBtn').addEventListener('click',()=>{
-  gameSection.style.display='none';
-  mainButtons.style.display='flex';
-});
-
-// ---- Settings ----
-const settingsModal = document.getElementById('settingsModal');
-document.getElementById('settingsBtn').addEventListener('click',()=>settingsModal.style.display='block');
-document.getElementById('closeSettings').addEventListener('click',()=>settingsModal.style.display='none');
-document.getElementById('bgColorPicker').addEventListener('input',e=>{
-  bgColor = e.target.value;
-  document.body.style.background = bgColor;
-});
-
-// ---- Launch ----
+// ---- Main Buttons ----
+document.getElementById('playBtn').addEventListener('click',()=>alert("Game Start! (Coin clicking works below)"));
 document.getElementById('launchBtn').addEventListener('click',()=>window.location.href='launch.html');
-
-// ---- Fun Buttons ----
-const emojis=['🎉','🪐','💥','✨','🔥','🌈','🚀','🛸','🪄','⚡','🍭','🎶','💎','🌟','💣'];
-document.getElementById('surpriseBtn').addEventListener('click',()=>alert(`Surprise! ${emojis[Math.floor(Math.random()*emojis.length)]}`));
+document.getElementById('surpriseBtn').addEventListener('click',()=>{
+  const emojis=['🎉','🪐','💥','✨','🔥','🌈','🚀'];
+  alert(`Surprise! ${emojis[Math.floor(Math.random()*emojis.length)]}`);
+});
 document.getElementById('colorBurstBtn').addEventListener('click',()=>{
   document.querySelectorAll('button').forEach(btn=>{
     const r=Math.floor(Math.random()*256),g=Math.floor(Math.random()*256),b=Math.floor(Math.random()*256);
@@ -169,6 +145,15 @@ document.getElementById('confettiBtn').addEventListener('click',()=>{
   }
 });
 
+// ---- Settings ----
+const settingsModal = document.getElementById('settingsModal');
+document.getElementById('settingsBtn').addEventListener('click',()=>settingsModal.style.display='block');
+document.getElementById('closeSettings').addEventListener('click',()=>settingsModal.style.display='none');
+document.getElementById('bgColorPicker').addEventListener('input',e=>{
+  bgColor = e.target.value;
+  document.body.style.background = bgColor;
+});
+
 // ---- Shop ----
 const shopModal = document.getElementById('shopModal');
 const shopItemsDiv = document.getElementById('shopItems');
@@ -179,51 +164,62 @@ function createShopButton(name, cost, type){
   const btn = document.createElement('button');
   btn.textContent = `${name} (Cost: ${cost})`;
   btn.addEventListener('click',()=>{
-    if(coins >= cost){
+    if(coins>=cost){
       coins -= cost;
       updateCoins();
+
+      // ---- Purchased buttons ----
       if(type==='button'){
         purchasedButtons.push(name);
-        addButtonToPage(name);
+        addButtonToHome(name);
         buttonsBought++;
-        localStorage.setItem('buttonsBought',buttonsBought);
-        localStorage.setItem('purchasedButtons',JSON.stringify(purchasedButtons));
-      } else if(type==='auto'){
-        autoClickers++;
-        localStorage.setItem('autoClickers',autoClickers);
-        startAutoClickers();
-        alert(`You now have ${autoClickers} Auto-Clicker(s)!`);
-        autoClickerPrice = Math.floor(autoClickerPrice * 1.5);
-        localStorage.setItem('autoClickerPrice', autoClickerPrice);
-      } else if(type==='multiplier'){
-        coinMultiplier++;
-        localStorage.setItem('coinMultiplier',coinMultiplier);
-        alert(`Coin multiplier increased! Each click now gives ${coinMultiplier} coin(s).`);
-        multiplierPrice = Math.floor(multiplierPrice * 1.5);
-        localStorage.setItem('multiplierPrice', multiplierPrice);
+        localStorage.setItem('buttonsBought', buttonsBought);
+        localStorage.setItem('purchasedButtons', JSON.stringify(purchasedButtons));
+        shopItemsDiv.removeChild(btn);
+
+        // ---- AI Assistant ----
+        if(buttonsBought % 3 === 0){
+          for(let i=0;i<3;i++){
+            const aiName = `AI Button ${Date.now()+i}`;
+            purchasedButtons.push(aiName);
+            addButtonToHome(aiName);
+          }
+          localStorage.setItem('purchasedButtons', JSON.stringify(purchasedButtons));
+          alert("🤖 AI Assistant activated! Added 3 extra buttons!");
+        }
       }
 
-      // AI Assistant: every 3 purchased buttons, add 3 new ones
-      if(buttonsBought > 0 && buttonsBought % 3 === 0 && type==='button'){
-        for(let i=0;i<3;i++){
-          const aiBtnName = `AI Button ${Date.now()+i}`;
-          purchasedButtons.push(aiBtnName);
-          addButtonToPage(aiBtnName);
-        }
-        localStorage.setItem('purchasedButtons',JSON.stringify(purchasedButtons));
-        alert("🤖 AI Assistant activated! Added 3 extra buttons!");
+      // ---- Auto-clicker ----
+      if(type==='auto'){
+        autoClickers++;
+        localStorage.setItem('autoClickers', autoClickers);
+        startAutoClickers();
+        alert(`You now have ${autoClickers} Auto-Clicker(s)!`);
+        // scale price
+        autoClickerPrice = Math.floor(autoClickerPrice * 1.5);
+        btn.textContent = `Auto-Clicker (Cost: ${autoClickerPrice})`;
       }
+
+      // ---- Multiplier ----
+      if(type==='multiplier'){
+        coinMultiplier++;
+        localStorage.setItem('coinMultiplier', coinMultiplier);
+        alert(`Coin multiplier increased! Each click gives ${coinMultiplier} coins.`);
+        multiplierPrice = Math.floor(multiplierPrice * 1.5);
+        btn.textContent = `Coin Upgrade +1 (Cost: ${multiplierPrice})`;
+      }
+
     } else alert("Not enough coins!");
   });
   shopItemsDiv.appendChild(btn);
 }
 
-// Add items
-createShopButton('Fun Button', 10, 'button');
-createShopButton('Starter Button: Play', 5, 'button');
-createShopButton('Starter Button: Surprise', 5, 'button');
-createShopButton('Auto-Clicker', autoClickerPrice, 'auto');
-createShopButton('Coin Upgrade +1', multiplierPrice, 'multiplier');
+// Initial Shop Items
+createShopButton('Fun Button',10,'button');
+createShopButton('Starter Button: Play',5,'button');
+createShopButton('Starter Button: Surprise',5,'button');
+createShopButton('Auto-Clicker',autoClickerPrice,'auto');
+createShopButton('Coin Upgrade +1',multiplierPrice,'multiplier');
 
 // ---- Save / Reset ----
 document.getElementById('saveBtn').addEventListener('click',()=>{
@@ -241,9 +237,8 @@ document.getElementById('resetSaveBtn').addEventListener('click',()=>{
   if(confirm("Are you sure you want to reset your save?")){
     coins=0; purchasedButtons=[]; autoClickers=0; coinMultiplier=1; bgColor='#111111';
     buttonsBought=0; autoClickerPrice=50; multiplierPrice=30;
-    localStorage.clear();
-    updateCoins();
-    document.body.style.background=bgColor;
+    localStorage.clear(); updateCoins(); document.body.style.background=bgColor;
+    buttonContainer.innerHTML=''; shopItemsDiv.innerHTML='';
     alert("Save Reset! ⚠️");
     location.reload();
   }
