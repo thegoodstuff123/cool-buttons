@@ -10,7 +10,12 @@ body {
   font-family:Arial,sans-serif;
   background:#111;
   color:white;
-  
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  min-height:100vh;
+}
 h1 { margin:20px 0; font-size:2.5rem; }
 .coins { font-size:1.5rem; margin-bottom:20px; }
 .button-row { display:flex; flex-wrap:wrap; justify-content:center; margin:10px 0; gap:10px; }
@@ -71,7 +76,13 @@ let purchasedButtons = JSON.parse(localStorage.getItem('purchasedButtons')) || [
 let autoClickers = parseInt(localStorage.getItem('autoClickers')) || 0;
 let coinMultiplier = parseInt(localStorage.getItem('coinMultiplier')) || 1;
 let bgColor = localStorage.getItem('bgColor') || '#111111';
+let buttonsBought = parseInt(localStorage.getItem('buttonsBought')) || 0;
 
+// Dynamic shop prices
+let autoClickerPrice = parseInt(localStorage.getItem('autoClickerPrice')) || 50;
+let multiplierPrice = parseInt(localStorage.getItem('multiplierPrice')) || 30;
+
+// Initialize
 document.body.style.background = bgColor;
 updateCoins();
 
@@ -80,6 +91,17 @@ function updateCoins(){
   document.getElementById('coins').textContent = coins;
   document.getElementById('gameCoins').textContent = `Coins: ${coins}`;
 }
+
+function addButtonToPage(name){
+  const newBtn = document.createElement('button');
+  newBtn.textContent = name;
+  newBtn.style.background = `hsl(${Math.random()*360},80%,60%)`;
+  newBtn.addEventListener('click', ()=> alert(`You pressed ${name}!`));
+  document.body.appendChild(newBtn);
+}
+
+// Restore AI/previous buttons
+purchasedButtons.forEach(btn=>addButtonToPage(btn));
 
 function startAutoClickers(){
   if(autoClickers>0){
@@ -100,14 +122,12 @@ playBtn.addEventListener('click',()=>{
   gameSection.style.display='flex';
 });
 
-// Coin Click
 document.getElementById('gameClickBtn').addEventListener('click',()=>{
   coins += coinMultiplier;
   updateCoins();
   localStorage.setItem('coins',coins);
 });
 
-// Back Button
 document.getElementById('gameBackBtn').addEventListener('click',()=>{
   gameSection.style.display='none';
   mainButtons.style.display='flex';
@@ -125,24 +145,18 @@ document.getElementById('bgColorPicker').addEventListener('input',e=>{
 // ---- Launch ----
 document.getElementById('launchBtn').addEventListener('click',()=>window.location.href='launch.html');
 
-// ---- Surprise Button ----
+// ---- Fun Buttons ----
 const emojis=['🎉','🪐','💥','✨','🔥','🌈','🚀','🛸','🪄','⚡','🍭','🎶','💎','🌟','💣'];
-document.getElementById('surpriseBtn').addEventListener('click',()=>{
-  alert(`Surprise! ${emojis[Math.floor(Math.random()*emojis.length)]}`);
-});
-
-// ---- Color Burst ----
+document.getElementById('surpriseBtn').addEventListener('click',()=>alert(`Surprise! ${emojis[Math.floor(Math.random()*emojis.length)]}`));
 document.getElementById('colorBurstBtn').addEventListener('click',()=>{
   document.querySelectorAll('button').forEach(btn=>{
     const r=Math.floor(Math.random()*256),g=Math.floor(Math.random()*256),b=Math.floor(Math.random()*256);
     btn.style.background=`rgb(${r},${g},${b})`;
   });
 });
-
-// ---- Confetti ----
 document.getElementById('confettiBtn').addEventListener('click',()=>{
   for(let i=0;i<50;i++){
-    const conf = document.createElement('div');
+    const conf=document.createElement('div');
     conf.style.position='fixed';
     conf.style.top='0';
     conf.style.left=Math.random()*100+'vw';
@@ -161,39 +175,55 @@ const shopItemsDiv = document.getElementById('shopItems');
 document.getElementById('shopBtn').addEventListener('click',()=>shopModal.style.display='block');
 document.getElementById('closeShop').addEventListener('click',()=>shopModal.style.display='none');
 
-const shopItems=[
-  {name:'Fun Button',cost:10,type:'button'},
-  {name:'Starter Button: Play',cost:5,type:'button'},
-  {name:'Starter Button: Surprise',cost:5,type:'button'},
-  {name:'Auto-Clicker',cost:50,type:'auto'},
-  {name:'Coin Upgrade +1',cost:30,type:'multiplier'}
-];
-
-shopItems.forEach(item=>{
-  const btn=document.createElement('button');
-  btn.textContent=`Buy ${item.name} (Cost: ${item.cost})`;
+function createShopButton(name, cost, type){
+  const btn = document.createElement('button');
+  btn.textContent = `${name} (Cost: ${cost})`;
   btn.addEventListener('click',()=>{
-    if(coins>=item.cost){
-      coins -= item.cost;
+    if(coins >= cost){
+      coins -= cost;
       updateCoins();
-      if(item.type==='button'){
-        purchasedButtons.push(item.name);
+      if(type==='button'){
+        purchasedButtons.push(name);
+        addButtonToPage(name);
+        buttonsBought++;
+        localStorage.setItem('buttonsBought',buttonsBought);
         localStorage.setItem('purchasedButtons',JSON.stringify(purchasedButtons));
-        alert(`You bought ${item.name}!`);
-      } else if(item.type==='auto'){
+      } else if(type==='auto'){
         autoClickers++;
         localStorage.setItem('autoClickers',autoClickers);
         startAutoClickers();
         alert(`You now have ${autoClickers} Auto-Clicker(s)!`);
-      } else if(item.type==='multiplier'){
+        autoClickerPrice = Math.floor(autoClickerPrice * 1.5);
+        localStorage.setItem('autoClickerPrice', autoClickerPrice);
+      } else if(type==='multiplier'){
         coinMultiplier++;
         localStorage.setItem('coinMultiplier',coinMultiplier);
         alert(`Coin multiplier increased! Each click now gives ${coinMultiplier} coin(s).`);
+        multiplierPrice = Math.floor(multiplierPrice * 1.5);
+        localStorage.setItem('multiplierPrice', multiplierPrice);
+      }
+
+      // AI Assistant: every 3 purchased buttons, add 3 new ones
+      if(buttonsBought > 0 && buttonsBought % 3 === 0 && type==='button'){
+        for(let i=0;i<3;i++){
+          const aiBtnName = `AI Button ${Date.now()+i}`;
+          purchasedButtons.push(aiBtnName);
+          addButtonToPage(aiBtnName);
+        }
+        localStorage.setItem('purchasedButtons',JSON.stringify(purchasedButtons));
+        alert("🤖 AI Assistant activated! Added 3 extra buttons!");
       }
     } else alert("Not enough coins!");
   });
   shopItemsDiv.appendChild(btn);
-});
+}
+
+// Add items
+createShopButton('Fun Button', 10, 'button');
+createShopButton('Starter Button: Play', 5, 'button');
+createShopButton('Starter Button: Surprise', 5, 'button');
+createShopButton('Auto-Clicker', autoClickerPrice, 'auto');
+createShopButton('Coin Upgrade +1', multiplierPrice, 'multiplier');
 
 // ---- Save / Reset ----
 document.getElementById('saveBtn').addEventListener('click',()=>{
@@ -202,19 +232,22 @@ document.getElementById('saveBtn').addEventListener('click',()=>{
   localStorage.setItem('autoClickers',autoClickers);
   localStorage.setItem('coinMultiplier',coinMultiplier);
   localStorage.setItem('bgColor',bgColor);
+  localStorage.setItem('buttonsBought',buttonsBought);
+  localStorage.setItem('autoClickerPrice',autoClickerPrice);
+  localStorage.setItem('multiplierPrice',multiplierPrice);
   alert("Game Saved! 💾");
 });
-
 document.getElementById('resetSaveBtn').addEventListener('click',()=>{
   if(confirm("Are you sure you want to reset your save?")){
     coins=0; purchasedButtons=[]; autoClickers=0; coinMultiplier=1; bgColor='#111111';
-    localStorage.clear(); updateCoins(); document.body.style.background=bgColor;
+    buttonsBought=0; autoClickerPrice=50; multiplierPrice=30;
+    localStorage.clear();
+    updateCoins();
+    document.body.style.background=bgColor;
     alert("Save Reset! ⚠️");
+    location.reload();
   }
 });
-
-document.getElementById('resetBtn').addEventListener('click',()=>location.reload());
-
 </script>
 </body>
 </html>
