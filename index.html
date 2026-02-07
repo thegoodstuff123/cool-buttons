@@ -60,35 +60,15 @@
     button:hover::before {
       left: 100%;
     }
-  </style>
-</head>
 
-<body>
-  <div>
-    <h1>🚀 Button Lab</h1>
-    <button id="playBtn">Play</button>
-    <button id="settingsBtn">Settings</button>
-    <button id="launchBtn">Launch</button>
-  </div>
-
-  <script>
-    // Play button → show alert
-    document.getElementById('playBtn').addEventListener('click', () => {
-      alert("🎮 Let's play!");
-    });
-
-    // Settings button → show simple popup
-    document.getElementById('settingsBtn').addEventListener('click', () => {
-      const username = prompt("Enter your name to save settings:");
-      if(username) alert(`Settings saved for ${username}! ✅`);
-    });
-
-    // Launch button → change background color randomly
-    document.getElementById('launchBtn').addEventListener('click', () => {
-      const colors = ['#ff0066', '#00ffff', '#ffcc00', '#33ff77', '#ff33ff'];
-      const randomColor = colors[Math.floor(Math.random() * colors.length)];
-      document.body.style.background = randomColor;
-    });
-  </script>
-</body>
-</html>
+    /* Modal settings */
+    #settingsModal {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #222;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 30px #00ffff;
+      c
