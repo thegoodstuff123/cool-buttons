@@ -20,20 +20,9 @@
     transition: background 0.5s;
   }
 
-  h1 {
-    font-size: 3rem;
-    margin: 20px 0;
-  }
-
-  .coins {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-  }
-
-  .button-row {
-    margin: 10px 0;
-  }
-
+  h1 { font-size: 3rem; margin: 20px 0; }
+  .coins { font-size: 1.5rem; margin-bottom: 20px; }
+  .button-row { margin: 10px 0; }
   button {
     padding: 15px 30px;
     margin: 10px;
@@ -48,27 +37,17 @@
     position: relative;
     overflow: hidden;
   }
-
-  button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 40px rgba(0, 200, 255, 0.9);
-  }
-
+  button:hover { transform: scale(1.1); box-shadow: 0 0 40px rgba(0, 200, 255, 0.9); }
   button::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.3);
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: rgba(255,255,255,0.3);
     transform: skewX(-30deg);
     transition: 0.5s;
   }
-
-  button:hover::before {
-    left: 100%;
-  }
+  button:hover::before { left: 100%; }
 
   #settingsModal, #shopModal {
     display: none;
@@ -81,13 +60,10 @@
     box-shadow: 0 0 30px #00ffff;
     color: white;
   }
-
-  #settingsModal button, #shopModal button {
-    margin-top: 15px;
-  }
-
+  #settingsModal button, #shopModal button { margin-top: 15px; }
 </style>
 </head>
+
 <body>
 <h1>🚀 Button Lab</h1>
 <div class="coins">💰 Coins: <span id="coins">0</span></div>
@@ -103,16 +79,15 @@
   <button id="colorBurstBtn">Color Burst</button>
   <button id="confettiBtn">Confetti</button>
   <button id="shopBtn">Shop</button>
-  <button id="resetBtn">Reset</button>
+  <button id="saveBtn">💾 Save</button>
+  <button id="resetSaveBtn">⚠️ Reset Save</button>
+  <button id="resetBtn">Reset Page</button>
 </div>
 
 <!-- Settings Modal -->
 <div id="settingsModal">
   <h2>Settings</h2>
-  <label>
-    Background Color:
-    <input type="color" id="bgColorPicker" value="#111111">
-  </label>
+  <label>Background Color: <input type="color" id="bgColorPicker" value="#111111"></label>
   <br>
   <button id="closeSettings">Close</button>
 </div>
@@ -127,107 +102,113 @@
 </div>
 
 <script>
-let coins = 0;
+let coins = parseInt(localStorage.getItem('coins')) || 0;
+updateCoins();
 
-// ---- Update coin display ----
 function updateCoins() {
   document.getElementById('coins').textContent = coins;
 }
 
-// ---- Play Button: Click Game ----
+// ---- Play Button: Clicker Game ----
 document.getElementById('playBtn').addEventListener('click', () => {
+  document.body.innerHTML = "<h1>Game Started!</h1>";
+  const scoreDisplay = document.createElement('div');
+  scoreDisplay.style.fontSize = '1.5rem';
+  scoreDisplay.style.margin = '10px';
+  scoreDisplay.textContent = `Coins: ${coins}`;
+  document.body.appendChild(scoreDisplay);
+
   const gameBtn = document.createElement('button');
   gameBtn.textContent = "Click Me!";
   gameBtn.style.fontSize = "1.5rem";
   gameBtn.style.padding = "20px 50px";
-
-  document.body.innerHTML = "<h1>Game Started!</h1>";
   document.body.appendChild(gameBtn);
+
+  const backBtn = document.createElement('button');
+  backBtn.textContent = "⬅ Back";
+  backBtn.style.marginTop = '20px';
+  document.body.appendChild(backBtn);
+  backBtn.addEventListener('click', ()=> location.reload());
 
   gameBtn.addEventListener('click', () => {
     coins++;
     updateCoins();
+    scoreDisplay.textContent = `Coins: ${coins}`;
   });
 });
 
-// ---- Settings Modal ----
+// ---- Settings ----
 const settingsModal = document.getElementById('settingsModal');
-document.getElementById('settingsBtn').addEventListener('click', () => {
-  settingsModal.style.display = 'block';
-});
-document.getElementById('closeSettings').addEventListener('click', () => {
-  settingsModal.style.display = 'none';
-});
-document.getElementById('bgColorPicker').addEventListener('input', (e) => {
-  document.body.style.background = e.target.value;
-});
+document.getElementById('settingsBtn').addEventListener('click', () => settingsModal.style.display='block');
+document.getElementById('closeSettings').addEventListener('click', ()=> settingsModal.style.display='none');
+document.getElementById('bgColorPicker').addEventListener('input', (e)=> document.body.style.background = e.target.value);
 
 // ---- Launch Button ----
-document.getElementById('launchBtn').addEventListener('click', () => {
-  window.location.href = 'launch.html';
-});
+document.getElementById('launchBtn').addEventListener('click', () => window.location.href='launch.html');
 
-// ---- Surprise Button ----
+// ---- Surprise ----
 document.getElementById('surpriseBtn').addEventListener('click', () => {
-  const emojis = ['🎉','🪐','💥','✨','🔥','🌈'];
-  const emoji = emojis[Math.floor(Math.random()*emojis.length)];
-  alert(`Surprise! ${emoji}`);
+  const emojis=['🎉','🪐','💥','✨','🔥','🌈'];
+  alert(`Surprise! ${emojis[Math.floor(Math.random()*emojis.length)]}`);
 });
 
-// ---- Color Burst Button ----
+// ---- Color Burst ----
 document.getElementById('colorBurstBtn').addEventListener('click', () => {
-  const buttons = document.querySelectorAll('button');
-  buttons.forEach(btn => {
-    const r = Math.floor(Math.random()*256);
-    const g = Math.floor(Math.random()*256);
-    const b = Math.floor(Math.random()*256);
-    btn.style.background = `rgb(${r},${g},${b})`;
+  document.querySelectorAll('button').forEach(btn=>{
+    const r=Math.floor(Math.random()*256), g=Math.floor(Math.random()*256), b=Math.floor(Math.random()*256);
+    btn.style.background=`rgb(${r},${g},${b})`;
   });
 });
 
-// ---- Confetti Button ----
-document.getElementById('confettiBtn').addEventListener('click', () => {
+// ---- Confetti ----
+document.getElementById('confettiBtn').addEventListener('click', ()=>{
   for(let i=0;i<50;i++){
-    const conf = document.createElement('div');
-    conf.style.position = 'fixed';
-    conf.style.top = '0';
-    conf.style.left = Math.random()*100 + 'vw';
-    conf.style.width = conf.style.height = '10px';
-    conf.style.background = `hsl(${Math.random()*360},80%,60%)`;
-    conf.style.opacity = 0.7;
-    conf.style.animation = 'fall 3s linear forwards';
+    const conf=document.createElement('div');
+    conf.style.position='fixed';
+    conf.style.top='0';
+    conf.style.left=Math.random()*100+'vw';
+    conf.style.width=conf.style.height='10px';
+    conf.style.background=`hsl(${Math.random()*360},80%,60%)`;
+    conf.style.opacity=0.7;
+    conf.style.animation='fall 3s linear forwards';
     document.body.appendChild(conf);
     setTimeout(()=>document.body.removeChild(conf),3000);
   }
 });
 
-// ---- Shop Modal ----
-const shopModal = document.getElementById('shopModal');
-document.getElementById('shopBtn').addEventListener('click', () => {
-  shopModal.style.display = 'block';
-});
-document.getElementById('closeShop').addEventListener('click', () => {
-  shopModal.style.display = 'none';
-});
-
-// ---- Buy New Button ----
-document.getElementById('buyButtonBtn').addEventListener('click', () => {
-  if(coins >= 10){
-    coins -= 10;
-    updateCoins();
-
-    const newBtn = document.createElement('button');
-    newBtn.textContent = "💥 Fun Button";
-    newBtn.style.background = `hsl(${Math.random()*360},80%,60%)`;
-    newBtn.addEventListener('click', ()=>alert("You pressed your new fun button!"));
+// ---- Shop ----
+const shopModal=document.getElementById('shopModal');
+document.getElementById('shopBtn').addEventListener('click', ()=> shopModal.style.display='block');
+document.getElementById('closeShop').addEventListener('click', ()=> shopModal.style.display='none');
+document.getElementById('buyButtonBtn').addEventListener('click', ()=>{
+  if(coins>=10){
+    coins-=10; updateCoins();
+    const newBtn=document.createElement('button');
+    newBtn.textContent="💥 Fun Button";
+    newBtn.style.background=`hsl(${Math.random()*360},80%,60%)`;
+    newBtn.addEventListener('click', ()=> alert("You pressed your new fun button!"));
     document.body.appendChild(newBtn);
-  } else {
-    alert("Not enough coins! Click in the game to earn more.");
+  } else alert("Not enough coins! Click in the game to earn more.");
+});
+
+// ---- Save / Load ----
+document.getElementById('saveBtn').addEventListener('click', ()=>{
+  localStorage.setItem('coins', coins);
+  alert("Game Saved! 💾");
+});
+
+// ---- Reset Save ----
+document.getElementById('resetSaveBtn').addEventListener('click', ()=>{
+  if(confirm("Are you sure you want to reset your save?")) {
+    coins=0;
+    localStorage.removeItem('coins');
+    updateCoins();
+    alert("Save Reset! ⚠️");
   }
 });
 
-// ---- Reset Button ----
-document.getElementById('resetBtn').addEventListener('click', () => location.reload());
+// ---- Reset Page ----
+document.getElementById('resetBtn').addEventListener('click', ()=> location.reload());
 </script>
 
 </body>
