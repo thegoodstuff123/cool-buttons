@@ -5,45 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rocket Launch 🚀</title>
 <style>
-body {
-  margin: 0;
-  background: black;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  height: 100vh;
-  overflow: hidden;
-  color: white;
-  font-family: Arial, sans-serif;
-  flex-direction: column;
-}
-#rocket { font-size: 5rem; position: absolute; bottom: 0; transition: bottom 3s ease-out; }
-button { margin: 10px; padding: 10px 20px; font-size: 1rem; border-radius: 10px; cursor:pointer; }
-.coins { font-size: 1.5rem; margin-top: 10px; }
+body { margin:0; background:black; color:white; font-family:Arial,sans-serif;
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100vh; }
+#rocket { font-size:5rem; margin-bottom:10px; transition:transform 3s ease-out; }
+button { margin:5px; padding:10px 20px; font-size:1rem; border-radius:10px; cursor:pointer; }
+.coins { margin-bottom:10px; font-size:1.5rem; }
 </style>
 </head>
 <body>
 
+<div class="coins">💰 Coins: <span id="coins">0</span></div>
 <div id="rocket">🚀</div>
 <button id="launchBtn">Launch Rocket!</button>
 <button id="backBtn">⬅ Back</button>
-<div class="coins">💰 Coins: <span id="coins">0</span></div>
 
 <script>
 let coins = parseInt(localStorage.getItem('coins')) || 0;
 document.getElementById('coins').textContent = coins;
 
-// Launch rocket animation
-document.getElementById('launchBtn').addEventListener('click', ()=>{
-  document.getElementById('rocket').style.bottom='100vh';
+document.getElementById('launchBtn').addEventListener('click',()=>{
+  document.getElementById('rocket').style.transform='translateY(-90vh)';
 });
 
-// Back button
-document.getElementById('backBtn').addEventListener('click', ()=>{
+document.getElementById('backBtn').addEventListener('click',()=>{
   location.href='index.html';
 });
 
-// Optional: auto-update coins if other page adds coins
+// Auto-update coins display
 setInterval(()=>{
   coins = parseInt(localStorage.getItem('coins')) || coins;
   document.getElementById('coins').textContent = coins;
