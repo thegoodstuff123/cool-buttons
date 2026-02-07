@@ -23,7 +23,8 @@ button:hover { transform:scale(1.1); }
   gap:10px;
 }
 #homeSection,#playSection {
-  margin-top:120px; display:flex; flex-direction:column; align-items:center; min-height:calc(100vh - 120px);
+  margin-top:140px; display:flex; flex-direction:column; align-items:center;
+  min-height:calc(100vh - 140px);
 }
 #buttonContainer {
   display:flex; flex-wrap:wrap; justify-content:center; gap:10px;
@@ -78,7 +79,7 @@ button:hover { transform:scale(1.1); }
 <!-- Shop Modal -->
 <div id="shopModal">
   <h2>Shop</h2>
-  <div id="shopItems"></div>
+  <div id="shopItems" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
   <button id="closeShop">Close</button>
 </div>
 
@@ -117,7 +118,7 @@ function updateCoins(){
 function addButtonToHome(name){
   const btn = document.createElement('button');
   btn.textContent = name;
-  const emojis=['🎉','💥','✨','🔥','🌈','🚀','🛸'];
+  const emojis=['🎉','💥','✨','🔥','🌈','🚀','🛸','💎','🍭','⚡'];
   btn.addEventListener('click',()=>{
     alert(`You pressed ${name}! ${emojis[Math.floor(Math.random()*emojis.length)]}`);
     clickSound.play();
@@ -224,16 +225,14 @@ function createShopButton(name, cost, type){
         localStorage.setItem('buttonsBought',buttonsBought);
         shopItemsDiv.removeChild(btn);
 
-        // AI assistant: every 3 buttons, add 3 AI buttons
+        // AI assistant: every 3 purchased buttons, add 3 AI buttons to shop
         if(buttonsBought % 3 === 0){
           for(let i=0;i<3;i++){
             const aiName = `AI Button ${Date.now()+i}`;
-            purchasedButtons.push(aiName);
-            addButtonToHome(aiName);
+            createShopButton(aiName, 15, 'button'); // AI buttons go to shop
           }
           aiSound.play();
-          localStorage.setItem('purchasedButtons',JSON.stringify(purchasedButtons));
-          alert("🤖 AI Assistant activated! Added 3 extra buttons!");
+          alert("🤖 AI Assistant restocked the shop with 3 new buttons!");
         }
       }
 
@@ -257,12 +256,14 @@ function createShopButton(name, cost, type){
   shopItemsDiv.appendChild(btn);
 }
 
-// Initial Shop Items
-createShopButton('Fun Button',10,'button');
-createShopButton('Starter Button: Play',5,'button');
-createShopButton('Starter Button: Surprise',5,'button');
+// ---- Initial Shop Items ----
+const starterButtons = ['Fun Button','Starter Play','Starter Surprise','Color Button','Emoji Button','Confetti Button','Rainbow Button'];
+starterButtons.forEach(b=>createShopButton(b, Math.floor(Math.random()*10)+5,'button'));
 createShopButton('Auto-Clicker',autoClickerPrice,'auto');
 createShopButton('Coin Upgrade +1',multiplierPrice,'multiplier');
+createShopButton('Mega Fun Button',20,'button');
+createShopButton('Super Color Burst',25,'button');
+createShopButton('Lucky Emoji',15,'button');
 
 // ---- Save / Reset ----
 document.getElementById('saveBtn').addEventListener('click',()=>{
