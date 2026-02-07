@@ -22,8 +22,10 @@ button:hover { transform:scale(1.1); }
   display:flex; flex-wrap:wrap; align-items:center; justify-content:center; z-index:1000;
   gap:10px;
 }
+#homeSection,#playSection {
+  margin-top:120px; display:flex; flex-direction:column; align-items:center; min-height:calc(100vh - 120px);
+}
 #buttonContainer {
-  margin-top:120px;
   display:flex; flex-wrap:wrap; justify-content:center; gap:10px;
 }
 #settingsModal,#shopModal {
@@ -36,6 +38,7 @@ button:hover { transform:scale(1.1); }
 </head>
 <body>
 
+<!-- GUI -->
 <div id="guiContainer">
   <div class="coins">💰 Coins: <span id="coins">0</span></div>
   <div class="button-row" id="mainButtons">
@@ -51,8 +54,17 @@ button:hover { transform:scale(1.1); }
   </div>
 </div>
 
-<div id="buttonContainer">
-  <!-- Purchased buttons (including AI buttons) appear here -->
+<!-- Home Section -->
+<div id="homeSection">
+  <div id="buttonContainer"></div>
+</div>
+
+<!-- Play Section -->
+<div id="playSection" style="display:none; text-align:center;">
+  <h2>Coin Clicker!</h2>
+  <div id="gameCoins">Coins: 0</div>
+  <button id="gameClickBtn">Click Me!</button>
+  <button id="gameBackBtn">⬅ Back</button>
 </div>
 
 <!-- Settings Modal -->
@@ -70,6 +82,11 @@ button:hover { transform:scale(1.1); }
   <button id="closeShop">Close</button>
 </div>
 
+<!-- Sounds -->
+<audio id="clickSound" src="https://freesound.org/data/previews/320/320181_5260877-lq.mp3"></audio>
+<audio id="buySound" src="https://freesound.org/data/previews/522/522180_5121236-lq.mp3"></audio>
+<audio id="aiSound" src="https://freesound.org/data/previews/198/198841_2859970-lq.mp3"></audio>
+
 <script>
 // ---- Persistent Data ----
 let coins = parseInt(localStorage.getItem('coins')) || 0;
@@ -78,20 +95,24 @@ let autoClickers = parseInt(localStorage.getItem('autoClickers')) || 0;
 let coinMultiplier = parseInt(localStorage.getItem('coinMultiplier')) || 1;
 let bgColor = localStorage.getItem('bgColor') || '#111111';
 let buttonsBought = parseInt(localStorage.getItem('buttonsBought')) || 0;
-
-// Prices
 let autoClickerPrice = parseInt(localStorage.getItem('autoClickerPrice')) || 50;
 let multiplierPrice = parseInt(localStorage.getItem('multiplierPrice')) || 30;
 
 document.body.style.background = bgColor;
+const buttonContainer = document.getElementById('buttonContainer');
 updateCoins();
+
+// ---- Sounds ----
+const clickSound = document.getElementById('clickSound');
+const buySound = document.getElementById('buySound');
+const aiSound = document.getElementById('aiSound');
 
 // ---- Functions ----
 function updateCoins(){
   document.getElementById('coins').textContent = coins;
+  const gameCoins = document.getElementById('gameCoins');
+  if(gameCoins) gameCoins.textContent = `Coins: ${coins}`;
 }
-
-const buttonContainer = document.getElementById('buttonContainer');
 
 function addButtonToHome(name){
   const btn = document.createElement('button');
@@ -99,6 +120,7 @@ function addButtonToHome(name){
   const emojis=['🎉','💥','✨','🔥','🌈','🚀','🛸'];
   btn.addEventListener('click',()=>{
     alert(`You pressed ${name}! ${emojis[Math.floor(Math.random()*emojis.length)]}`);
+    clickSound.play();
   });
   buttonContainer.appendChild(btn);
 }
@@ -117,19 +139,43 @@ function startAutoClickers(){
 }
 startAutoClickers();
 
-// ---- Main Buttons ----
-document.getElementById('playBtn').addEventListener('click',()=>alert("Game Start! (Coin clicking works below)"));
+// ---- GUI Buttons ----
+const homeSection = document.getElementById('homeSection');
+const playSection = document.getElementById('playSection');
+
+document.getElementById('playBtn').addEventListener('click',()=>{
+  homeSection.style.display='none';
+  playSection.style.display='flex';
+});
+
+document.getElementById('gameBackBtn').addEventListener('click',()=>{
+  playSection.style.display='none';
+  homeSection.style.display='flex';
+});
+
+document.getElementById('gameClickBtn').addEventListener('click',()=>{
+  coins += coinMultiplier;
+  updateCoins();
+  localStorage.setItem('coins',coins);
+  clickSound.play();
+});
+
 document.getElementById('launchBtn').addEventListener('click',()=>window.location.href='launch.html');
+
 document.getElementById('surpriseBtn').addEventListener('click',()=>{
   const emojis=['🎉','🪐','💥','✨','🔥','🌈','🚀'];
   alert(`Surprise! ${emojis[Math.floor(Math.random()*emojis.length)]}`);
+  clickSound.play();
 });
+
 document.getElementById('colorBurstBtn').addEventListener('click',()=>{
   document.querySelectorAll('button').forEach(btn=>{
     const r=Math.floor(Math.random()*256),g=Math.floor(Math.random()*256),b=Math.floor(Math.random()*256);
     btn.style.background=`rgb(${r},${g},${b})`;
   });
+  clickSound.play();
 });
+
 document.getElementById('confettiBtn').addEventListener('click',()=>{
   for(let i=0;i<50;i++){
     const conf=document.createElement('div');
@@ -143,6 +189,7 @@ document.getElementById('confettiBtn').addEventListener('click',()=>{
     document.body.appendChild(conf);
     setTimeout(()=>document.body.removeChild(conf),3000);
   }
+  clickSound.play();
 });
 
 // ---- Settings ----
@@ -167,44 +214,40 @@ function createShopButton(name, cost, type){
     if(coins>=cost){
       coins -= cost;
       updateCoins();
+      buySound.play();
 
-      // ---- Purchased buttons ----
       if(type==='button'){
         purchasedButtons.push(name);
         addButtonToHome(name);
         buttonsBought++;
-        localStorage.setItem('buttonsBought', buttonsBought);
-        localStorage.setItem('purchasedButtons', JSON.stringify(purchasedButtons));
+        localStorage.setItem('purchasedButtons',JSON.stringify(purchasedButtons));
+        localStorage.setItem('buttonsBought',buttonsBought);
         shopItemsDiv.removeChild(btn);
 
-        // ---- AI Assistant ----
+        // AI assistant: every 3 buttons, add 3 AI buttons
         if(buttonsBought % 3 === 0){
           for(let i=0;i<3;i++){
             const aiName = `AI Button ${Date.now()+i}`;
             purchasedButtons.push(aiName);
             addButtonToHome(aiName);
           }
-          localStorage.setItem('purchasedButtons', JSON.stringify(purchasedButtons));
+          aiSound.play();
+          localStorage.setItem('purchasedButtons',JSON.stringify(purchasedButtons));
           alert("🤖 AI Assistant activated! Added 3 extra buttons!");
         }
       }
 
-      // ---- Auto-clicker ----
       if(type==='auto'){
         autoClickers++;
         localStorage.setItem('autoClickers', autoClickers);
         startAutoClickers();
-        alert(`You now have ${autoClickers} Auto-Clicker(s)!`);
-        // scale price
         autoClickerPrice = Math.floor(autoClickerPrice * 1.5);
         btn.textContent = `Auto-Clicker (Cost: ${autoClickerPrice})`;
       }
 
-      // ---- Multiplier ----
       if(type==='multiplier'){
         coinMultiplier++;
         localStorage.setItem('coinMultiplier', coinMultiplier);
-        alert(`Coin multiplier increased! Each click gives ${coinMultiplier} coins.`);
         multiplierPrice = Math.floor(multiplierPrice * 1.5);
         btn.textContent = `Coin Upgrade +1 (Cost: ${multiplierPrice})`;
       }
@@ -233,12 +276,13 @@ document.getElementById('saveBtn').addEventListener('click',()=>{
   localStorage.setItem('multiplierPrice',multiplierPrice);
   alert("Game Saved! 💾");
 });
+
 document.getElementById('resetSaveBtn').addEventListener('click',()=>{
   if(confirm("Are you sure you want to reset your save?")){
     coins=0; purchasedButtons=[]; autoClickers=0; coinMultiplier=1; bgColor='#111111';
     buttonsBought=0; autoClickerPrice=50; multiplierPrice=30;
-    localStorage.clear(); updateCoins(); document.body.style.background=bgColor;
-    buttonContainer.innerHTML=''; shopItemsDiv.innerHTML='';
+    localStorage.clear(); updateCoins(); buttonContainer.innerHTML=''; shopItemsDiv.innerHTML='';
+    document.body.style.background=bgColor;
     alert("Save Reset! ⚠️");
     location.reload();
   }
@@ -246,3 +290,4 @@ document.getElementById('resetSaveBtn').addEventListener('click',()=>{
 </script>
 </body>
 </html>
+
