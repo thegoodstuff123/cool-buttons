@@ -115,19 +115,23 @@ function updateCoins(){
   if(gameCoins) gameCoins.textContent = `Coins: ${coins}`;
 }
 
-function addButtonToHome(name){
+function addButtonToHome(name, isAI=false){
   const btn = document.createElement('button');
   btn.textContent = name;
-  const emojis=['🎉','💥','✨','🔥','🌈','🚀','🛸','💎','🍭','⚡'];
-  btn.addEventListener('click',()=>{
-    alert(`You pressed ${name}! ${emojis[Math.floor(Math.random()*emojis.length)]}`);
-    clickSound.play();
-  });
+  if(isAI){
+    addAIButtonEffect(btn);
+  } else {
+    btn.addEventListener('click',()=>{
+      const emojis=['🎉','💥','✨','🔥','🌈','🚀','🛸','💎','🍭','⚡'];
+      alert(`You pressed ${name}! ${emojis[Math.floor(Math.random()*emojis.length)]}`);
+      clickSound.play();
+    });
+  }
   buttonContainer.appendChild(btn);
 }
 
 // Restore purchased buttons
-purchasedButtons.forEach(name=>addButtonToHome(name));
+purchasedButtons.forEach(name=>addButtonToHome(name,true));
 
 // ---- Auto Clickers ----
 function startAutoClickers(){
@@ -208,6 +212,8 @@ const shopItemsDiv = document.getElementById('shopItems');
 document.getElementById('shopBtn').addEventListener('click',()=>shopModal.style.display='block');
 document.getElementById('closeShop').addEventListener('click',()=>shopModal.style.display='none');
 
+const aiButtonNames = ["Super Fun","Rainbow Blast","Mega Pop","Emoji Surge","Confetti Storm","Lucky Strike","Color Burst","Sparkle Star","Turbo Click"];
+
 function createShopButton(name, cost, type){
   const btn = document.createElement('button');
   btn.textContent = `${name} (Cost: ${cost})`;
@@ -219,17 +225,17 @@ function createShopButton(name, cost, type){
 
       if(type==='button'){
         purchasedButtons.push(name);
-        addButtonToHome(name);
+        addButtonToHome(name,true);
         buttonsBought++;
         localStorage.setItem('purchasedButtons',JSON.stringify(purchasedButtons));
         localStorage.setItem('buttonsBought',buttonsBought);
         shopItemsDiv.removeChild(btn);
 
-        // AI assistant: every 3 purchased buttons, add 3 AI buttons to shop
+        // AI restock: every 3 buttons bought
         if(buttonsBought % 3 === 0){
           for(let i=0;i<3;i++){
-            const aiName = `AI Button ${Date.now()+i}`;
-            createShopButton(aiName, 15, 'button'); // AI buttons go to shop
+            const aiName = aiButtonNames[Math.floor(Math.random()*aiButtonNames.length)];
+            createShopButton(aiName, Math.floor(Math.random()*15)+10,'button');
           }
           aiSound.play();
           alert("🤖 AI Assistant restocked the shop with 3 new buttons!");
@@ -254,6 +260,51 @@ function createShopButton(name, cost, type){
     } else alert("Not enough coins!");
   });
   shopItemsDiv.appendChild(btn);
+}
+
+// ---- AI button effects ----
+function addAIButtonEffect(btn){
+  const effects = [
+    // Spawn emojis falling
+    ()=>{
+      const emojis = ['🎉','💥','✨','🔥','🌈','🚀','🍭','⚡','😎','🪐'];
+      for(let i=0;i<20;i++){
+        const e = document.createElement('div');
+        e.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+        e.style.position = 'fixed';
+        e.style.left = Math.random() * 90 + 'vw';
+        e.style.top = Math.random() * 80 + 'vh';
+        e.style.fontSize = Math.random()*30 + 20 + 'px';
+        e.style.pointerEvents = 'none';
+        e.style.zIndex = 9999;
+        e.style.opacity = Math.random()*0.8+0.2;
+        document.body.appendChild(e);
+        const duration = Math.random()*2000 + 1000;
+        e.animate([{transform:'translateY(0px)'},{transform:`translateY(${Math.random()*200+100}px)`}], {duration:duration, easing:'ease-out'});
+        setTimeout(()=>document.body.removeChild(e), duration);
+      }
+    },
+    // Add coins
+    ()=>{
+      const earned = Math.floor(Math.random()*5)+1;
+      coins += earned;
+      updateCoins();
+      buySound.play();
+      alert(`💰 You earned ${earned} bonus coins!`);
+    },
+    // Color flash
+    ()=>{
+      document.querySelectorAll('button').forEach(b=>{
+        const r=Math.floor(Math.random()*256),g=Math.floor(Math.random()*256),b_=Math.floor(Math.random()*256);
+        b.style.background=`rgb(${r},${g},${b_})`;
+      });
+    }
+  ];
+
+  btn.addEventListener('click',()=>{
+    const effect = effects[Math.floor(Math.random()*effects.length)];
+    effect();
+  });
 }
 
 // ---- Initial Shop Items ----
@@ -291,4 +342,3 @@ document.getElementById('resetSaveBtn').addEventListener('click',()=>{
 </script>
 </body>
 </html>
-
